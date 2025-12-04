@@ -27,6 +27,9 @@ pip install -q requests accelerate sentencepiece pytablewriter einops protobuf h
 pip install -U transformers
 pip install bitsandbytes scipy
 
+# IMPORTANT: Upgrade torchvision to match new PyTorch version
+pip install --upgrade torch torchvision torchaudio
+
 # Check if HUGGINGFACE_TOKEN is set and log in to Hugging Face
 if [ -n "$HUGGINGFACE_TOKEN" ]; then
     echo "HUGGINGFACE_TOKEN is defined. Logging in..."
