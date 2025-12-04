@@ -120,7 +120,7 @@ elif [ "$BENCHMARK" == "openllm" ]; then
     echo "================== $(echo $benchmark | tr '[:lower:]' '[:upper:]') [1/6] =================="
     accelerate launch -m lm_eval \
         --model hf \
-        --model_args $MODEL_ARGS \
+        --model_args "$MODEL_ARGS" \
         --tasks arc_challenge \
         --num_fewshot 25 \
         --batch_size auto \
@@ -130,7 +130,7 @@ elif [ "$BENCHMARK" == "openllm" ]; then
     echo "================== $(echo $benchmark | tr '[:lower:]' '[:upper:]') [2/6] =================="
     accelerate launch -m lm_eval \
         --model hf \
-        --model_args $MODEL_ARGS \
+        --model_args "$MODEL_ARGS" \
         --tasks hellaswag \
         --num_fewshot 10 \
         --batch_size auto \
@@ -140,7 +140,7 @@ elif [ "$BENCHMARK" == "openllm" ]; then
     echo "================== $(echo $benchmark | tr '[:lower:]' '[:upper:]') [3/6] =================="
     accelerate launch -m lm_eval \
         --model hf \
-        --model_args $MODEL_ARGS \
+        --model_args "$MODEL_ARGS" \
         --tasks mmlu \
         --num_fewshot 5 \
         --batch_size auto \
@@ -151,7 +151,7 @@ elif [ "$BENCHMARK" == "openllm" ]; then
     echo "================== $(echo $benchmark | tr '[:lower:]' '[:upper:]') [4/6] =================="
     accelerate launch -m lm_eval \
         --model hf \
-        --model_args $MODEL_ARGS \
+        --model_args "$MODEL_ARGS" \
         --tasks truthfulqa \
         --num_fewshot 0 \
         --batch_size auto \
@@ -161,7 +161,7 @@ elif [ "$BENCHMARK" == "openllm" ]; then
     echo="================== $(echo $benchmark | tr '[:lower:]' '[:upper:]') [5/6] =================="
     accelerate launch -m lm_eval \
         --model hf \
-        --model_args $MODEL_ARGS \
+        --model_args "$MODEL_ARGS" \
         --tasks winogrande \
         --num_fewshot 5 \
         --batch_size auto \
@@ -171,7 +171,7 @@ elif [ "$BENCHMARK" == "openllm" ]; then
     echo "================== $(echo $benchmark | tr '[:lower:]' '[:upper:]') [6/6] =================="
     accelerate launch -m lm_eval \
         --model hf \
-        --model_args $MODEL_ARGS \
+        --model_args "$MODEL_ARGS" \
         --tasks gsm8k \
         --num_fewshot 5 \
         --batch_size auto \
