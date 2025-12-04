@@ -1,4 +1,4 @@
-# !/bin/bash
+#!/bin/bash
 
 start=$(date +%s)
 
@@ -23,8 +23,12 @@ apt install -y screen vim git-lfs
 screen
 
 # Install common libraries
-pip install -q requests accelerate sentencepiece pytablewriter einops protobuf huggingface_hub==0.21.4
+# Added 'bitsandbytes' for 4-bit loading support
+pip install -q requests accelerate sentencepiece pytablewriter einops protobuf huggingface_hub==0.21.4 bitsandbytes
 pip install -U transformers
+
+# Downgrade datasets to support older evaluation harness (Fixes piqa.py error)
+pip install "datasets<2.20.0"
 
 # Check if HUGGINGFACE_TOKEN is set and log in to Hugging Face
 if [ -n "$HUGGINGFACE_TOKEN" ]; then
@@ -36,6 +40,16 @@ if [ "$DEBUG" == "True" ]; then
     echo "Launch LLM AutoEval in debug mode"
 fi
 
+# ==============================================================================
+#  CONFIGURATION SECTION
+# ==============================================================================
+# Use "dtype=float16" for standard 16-bit Base Models (Baseline)
+# Use "load_in_4bit=True" for 4-bit Quantized Models
+# ------------------------------------------------------------------------------
+# MODEL_ARGS="pretrained=$MODEL_ID,trust_remote_code=$TRUST_REMOTE_CODE,dtype=float16"
+MODEL_ARGS="pretrained=$MODEL_ID,trust_remote_code=$TRUST_REMOTE_CODE,load_in_4bit=True"
+# ==============================================================================
+
 # Run evaluation
 if [ "$BENCHMARK" == "nous" ]; then
     git clone -b add-agieval https://github.com/dmahan93/lm-evaluation-harness
@@ -46,7 +60,7 @@ if [ "$BENCHMARK" == "nous" ]; then
     echo "================== $(echo $benchmark | tr '[:lower:]' '[:upper:]') [1/4] =================="
     python main.py \
         --model hf-causal \
-        --model_args pretrained=$MODEL_ID,trust_remote_code=$TRUST_REMOTE_CODE,dtype=float16 \
+        --model_args $MODEL_ARGS \
         --tasks agieval_aqua_rat,agieval_logiqa_en,agieval_lsat_ar,agieval_lsat_lr,agieval_lsat_rc,agieval_sat_en,agieval_sat_en_without_passage,agieval_sat_math \
         --device cuda:$cuda_devices \
         --batch_size auto \
@@ -56,7 +70,7 @@ if [ "$BENCHMARK" == "nous" ]; then
     echo "================== $(echo $benchmark | tr '[:lower:]' '[:upper:]') [2/4] =================="
     python main.py \
         --model hf-causal \
-        --model_args pretrained=$MODEL_ID,trust_remote_code=$TRUST_REMOTE_CODE,dtype=float16 \
+        --model_args $MODEL_ARGS \
         --tasks hellaswag,openbookqa,winogrande,arc_easy,arc_challenge,boolq,piqa \
         --device cuda:$cuda_devices \
         --batch_size auto \
@@ -66,7 +80,7 @@ if [ "$BENCHMARK" == "nous" ]; then
     echo "================== $(echo $benchmark | tr '[:lower:]' '[:upper:]') [3/4] =================="
     python main.py \
         --model hf-causal \
-        --model_args pretrained=$MODEL_ID,trust_remote_code=$TRUST_REMOTE_CODE,dtype=float16 \
+        --model_args $MODEL_ARGS \
         --tasks truthfulqa_mc \
         --device cuda:$cuda_devices \
         --batch_size auto \
@@ -76,7 +90,7 @@ if [ "$BENCHMARK" == "nous" ]; then
     echo "================== $(echo $benchmark | tr '[:lower:]' '[:upper:]') [4/4] =================="
     python main.py \
         --model hf-causal \
-        --model_args pretrained=$MODEL_ID,trust_remote_code=$TRUST_REMOTE_CODE,dtype=float16 \
+        --model_args $MODEL_ARGS \
         --tasks bigbench_causal_judgement,bigbench_date_understanding,bigbench_disambiguation_qa,bigbench_geometric_shapes,bigbench_logical_deduction_five_objects,bigbench_logical_deduction_seven_objects,bigbench_logical_deduction_three_objects,bigbench_movie_recommendation,bigbench_navigate,bigbench_reasoning_about_colored_objects,bigbench_ruin_names,bigbench_salient_translation_error_detection,bigbench_snarks,bigbench_sports_understanding,bigbench_temporal_sequences,bigbench_tracking_shuffled_objects_five_objects,bigbench_tracking_shuffled_objects_seven_objects,bigbench_tracking_shuffled_objects_three_objects \
         --device cuda:$cuda_devices \
         --batch_size auto \
